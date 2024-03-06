@@ -64,4 +64,60 @@ router.post('/get_link_data', function(req, res, next){
 
 
 
+
+const paginate= ({
+        currentPage,
+        pageSize
+    }) => {
+        const offset = parseInt((currentPage - 1) * pageSize, 10);
+        const limit = parseInt(pageSize, 10);
+        return {
+            offset,
+            limit,
+        };
+    }
+
+    const { Op } = require("sequelize");
+router.get('/list', async function(req, res, next){
+
+
+  let currentPage=req.query.page || 1;
+  let perPage=req.query.per_page || 10;
+  let search=req.query.search || "";
+  // import function here
+
+  
+  var condition =search ? 
+  {[Op.or]: [ 
+    { camp_name: { [Op.like]: `%${search}%` } }, 
+    { camp_id: { [Op.like]: `%${search}%` } } ,
+    { camp_type: { [Op.like]: `%${search}%` } } 
+  ]}
+  : null;
+
+  const result = await CampaignModel.findAndCountAll({
+    where: condition,
+    order: [
+        ['createdAt', 'DESC']
+    ],
+    ...paginate({
+        currentPage,
+        pageSize: perPage
+    }),
+  })
+
+  let totalPages=Math.ceil(result.count/perPage);
+
+  res.send({
+    totalItems:result.count,
+    totalPages,
+    perPage,
+    currentPage:(currentPage>totalPages)?totalPages:(currentPage<1)?1:currentPage,
+    data:result.rows,
+  })
+
+});
+
+
+
 module.exports = router
