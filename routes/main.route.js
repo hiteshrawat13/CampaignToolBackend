@@ -3,13 +3,15 @@ const router=express.Router()
 
 
 const datatable = require(`new-sequelize-datatables`);
-const {CampaignModel}=require("../models/Campaign.js")
+const {campListModel}=require("../models/campList.js")
 const {LinkModel} =require("../models/Link.js")
 
 
 const mainController = require('../controllers/main.controller.js')
 
 const {authenticate}=require("../middlewares/authenticate.js")
+
+router.post('/upload_file',mainController.upload_file)
 
 
 router.post('/campaign/create',mainController.create_campaign)
@@ -25,15 +27,15 @@ router.get('/authenticate',authenticate,(req,res)=>{
 })
 
 
-router.get('/get_data', function(req, res, next){
+// router.get('/get_data', function(req, res, next){
 
-    datatable(CampaignModel, req.query, null) 
-    .then((result) => {
-      // result is response for datatables
-      res.json(result);
-    });
+//     datatable(CampaignModel, req.query, null) 
+//     .then((result) => {
+//       // result is response for datatables
+//       res.json(result);
+//     });
 
-});
+// });
 
 router.get('/get_links_data/:camp_id', function(req, res, next){
 
@@ -95,7 +97,7 @@ router.get('/list', async function(req, res, next){
   ]}
   : null;
 
-  const result = await CampaignModel.findAndCountAll({
+  const result = await campListModel.findAndCountAll({
     where: condition,
     order: [
         ['createdAt', 'DESC']

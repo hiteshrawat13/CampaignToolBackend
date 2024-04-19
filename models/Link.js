@@ -1,50 +1,58 @@
 const { sequelize } = require("../sequelize.js");
 const { DataTypes,Sequelize } = require("sequelize");
+ const {campListModel}  = require("./campList.js")
 
 const LinkModel = sequelize.define(
-   "Link",
+   "Links",
    {
       // Each attribute will pair with a column
       // Here we define our model attributes
 
       // Our primaryKey, book id, our unique identifier
       id: {
-         type: DataTypes.UUID,
-         defaultValue: Sequelize.UUIDV4,
+         type:Sequelize.INTEGER,
+         autoIncrement: true,
          primaryKey: true,
+         allowNull: false
       },
 
-
-        // This will create a title for a column of the book
-        camp_id: {
-            type: DataTypes.STRING,
-       
-         },
-   
-
-      // This will create a title for a column of the book
-      link_name: {
+      link_title: {
          type: DataTypes.STRING,
          allowNull: false,
       },
 
-      // This will create a column for the author's name
-      link_type: {
+      link: {
          type: DataTypes.STRING,
-         // remember allowNull defaults to true
+         allowNull: false,
+         unique: true
+      },
+      
+
+      language: {
+         type: DataTypes.STRING,
+         allowNull: false,
       },
 
-      link_data: {
-         type: DataTypes.TEXT,
-         // remember allowNull defaults to true
+      Link_Created_By: {
+         type: DataTypes.STRING,
+         allowNull: false,
       },
-   },
-   {
-      // For the sake of clarity we specify our indexes
-      indexes: [{ unique: true, fields: ["id"] }],
+   
+        camp_name: {
+         type: DataTypes.STRING,
+         allowNull: false,
+         references: {
+            model: campListModel,
+            key: "camp_name",
+          },
+      },
+
    }
 );
+
+LinkModel.belongsTo(campListModel, { foreignKey: "camp_name" });
+campListModel.hasMany(LinkModel, { foreignKey: "camp_name" });
+
 module.exports = {
    LinkModel
 };
-
