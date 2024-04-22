@@ -51,6 +51,8 @@ io.on("connection", (socket) => {
     sockets[sessionId] = socket.id
     // The sockets object is stored in Express so it can be grabbed in a route
     app.set("sockets", sockets)
+
+    console.log("connectinit",sessionId);
   })
 
   socket.on('disconnect', function (s) {

@@ -12,60 +12,9 @@ const { LinkModel } = require('../models/Link.js')
 // const jwt =require('jsonwebtoken')
 // Upload csv to mysql db
 
+const FTP=require("../ftp.js")
 
-var Client = require('ftp');
-
-
-class FTP{
-
-    constructor(){
-        //ITBP V2
-        this.config={
-            host:"192.46.219.45", // The hostname or IP address of the FTP server. Default: 'localhost'
-            port:21, // The port of the FTP server. Default: 21
-            secure:false,//Set to true for both control and data connection encryption, 'control' for control connection encryption only, or 'implicit' for implicitly encrypted control connection (this mode is deprecated in modern times, but usually uses port 990) Default: false
-            user:"itbpnet@itbusinessplus.net",
-            password: 'Pilot@2023?',
-            path:"template/hitesh/test"
-        }
-    }
-
-
-    connect(fileStream,fileName,onProgress) {
-        onProgress( 'Connecting to ftp......')
-       
-        var c = new Client();
-        c.connect(this.config);
-        c.on('ready', function() {
-            console.log("FTP Ready");
-            onProgress('ftp connected......')
-
-            c.put(fileStream,`${this.config.path}/${fileName}`, function(err) {
-                if (err) {
-                    onProgress('uploadProgress', err)
-                    console.log( err );
-                };
-                console.log("Completed...");
-                res.json({data:"OK"})
-                onProgress('uploading complete ..')
-                c.end(); //end ftp connection
-            });
-
-            let transfered=0;
-            fileStream.on('data', data => {
-                // do the piping manually here.
-                // console.log("OnDATA",data.length);
-                transfered+=data.length
-                onProgress('uploading to ftp ..'+formatBytes(transfered))
-                //console.log("Uploading...");
-  
-            });
-        });
-        // connect to localhost:21 as anonymous
-        
-    }
-
-}
+const axios=require("axios")
 
 
 exports.upload_file = async (req, res) => {
@@ -76,11 +25,15 @@ exports.upload_file = async (req, res) => {
  if(req.busboy) {
     let socketInstance=null;
     console.log("HAS BUSBOY");
-    req.busboy.on('field', function(fieldname, val) {
+    const ftp=new FTP()
+    await ftp.connect1()
+    req.busboy.on('field', (fieldname, val)=> {
         req.body[fieldname]=val
     });
 
-    req.busboy.on("file", function(fieldName, fileStream, fileName, encoding, mimeType) {
+    req.busboy.on("file", (fieldName, fileStream, fileName, encoding, mimeType) =>{
+        
+        console.log("on file");
         const io = req.app.get('io');
         const sockets = req.app.get('sockets');
         if(!sockets[req.body.sessionId]){
@@ -91,8 +44,9 @@ exports.upload_file = async (req, res) => {
         socketInstance = io.to(thisSocketId);
 
 
-        const ftp=new FTP()
-        ftp.connect(fileStream,fileName.filename,(progress)=>{
+        
+        ftp.uploadFile(fileStream,fileName.filename,(progress)=>{
+           console.log("upload progress");
             socketInstance.emit('uploadProgress', progress);
         })
         
@@ -101,7 +55,7 @@ exports.upload_file = async (req, res) => {
 
     req.busboy.on('finish', () => {
         // You can access both values and both above event handles have run before this handler.
-        
+        console.log("onfinish");
         socketInstance.emit('uploadProgress', 'FINISHED');
         //socketInstance.emit('uploadProgress', 'Finished');
     })
@@ -111,17 +65,16 @@ exports.upload_file = async (req, res) => {
 }
 
 
-function formatBytes(bytes, decimals = 2) {
-    if (!+bytes) return '0 Bytes'
-
-    const k = 1024
-    const dm = decimals < 0 ? 0 : decimals
-    const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+exports.check_url=async (req, res) => {
+    try {
+        const response = await axios.head(req.body.url)
+        return response.status === 200;
+    } catch (error) {
+        //winston.error(`Error checking file ${this.getAssetFullPath(assetName)} existence on S3`)
+        return false
+    }
 }
+
 
 
 exports.create_campaign = async (req, res) => {
