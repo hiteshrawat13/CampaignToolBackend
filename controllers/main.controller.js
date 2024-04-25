@@ -16,23 +16,35 @@ const FTP=require("../ftp.js")
 
 const axios=require("axios")
 
+const Busboy=require('busboy')
+
 
 exports.upload_file = async (req, res) => {
 
 
 
-
+  
  if(req.busboy) {
+
+    
     let socketInstance=null;
-    console.log("HAS BUSBOY");
+    let socket=null
+     console.log("HAS BUSBOY");
+
+     
+     try {
+        
+    
     const ftp=new FTP()
     await ftp.connect1()
-    req.busboy.on('field', (fieldname, val)=> {
+    const form = Busboy({ headers: req.headers })
+    form.on('field', (fieldname, val)=> {
         req.body[fieldname]=val
     });
 
-    req.busboy.on("file", (fieldName, fileStream, fileName, encoding, mimeType) =>{
+    form.on("file", (fieldName, fileStream, fileName, encoding, mimeType) =>{
         
+        console.log("File:",fileName);
         console.log("on file");
         const io = req.app.get('io');
         const sockets = req.app.get('sockets');
@@ -41,37 +53,128 @@ exports.upload_file = async (req, res) => {
             return;
         }
         const thisSocketId = sockets[req.body.sessionId];
+    
         socketInstance = io.to(thisSocketId);
+        console.log("MY SOCKET ID",thisSocketId);
+        socket=socketInstance.adapter.nsp.sockets.get(thisSocketId)
 
 
         
         ftp.uploadFile(fileStream,fileName.filename,(progress)=>{
-           console.log("upload progress");
-            socketInstance.emit('uploadProgress', progress);
+         //  console.log("upload progress");
+            socketInstance.emit('uploadProgress', {name:fileName.filename,progress:progress});
+        },
+        function onComplete(result){
+            socketInstance.emit('uploadProgress', {name:fileName.filename,progress:result});
+        },
+        function onError(error){
+            socketInstance.emit('uploadProgress', {name:fileName.filename,progress:error});
         })
         
     });
 
 
-    req.busboy.on('finish', () => {
+    form.on('finish', async() => {
+
+
+        const files=JSON.parse(req.body.templateFiles)
+       console.log("Template Files",req.body);
+        let response=[]
+        for (let i = 0; i< files.length; i++) {
+            const file =files[i];
+            try{
+                await ftp.createFile(file.data,file.name)
+                response.push({name:file.name,status:"created"})
+                socketInstance.emit('uploadProgress', {name:file.name,progress:"created"} );
+            }catch(error){
+                response.push({name:file.name,status:"not created"})
+                socketInstance.emit('uploadProgress', {name:file.name,progress:"not created"});
+            }
+            
+        }
+
         // You can access both values and both above event handles have run before this handler.
         console.log("onfinish");
-        socketInstance.emit('uploadProgress', 'FINISHED');
+        ftp.endConnection();
+       // socketInstance.emit('uploadProgress', 'FINISHED');
         //socketInstance.emit('uploadProgress', 'Finished');
+
+        
+        socket?.disconnect()
     })
 
-    return req.pipe(req.busboy);
+    req.pipe(form);
+    } catch (error) {
+        console.log(error); 
+       
+        socket?.disconnect()
+    }
+}else{
+    // let socketInstance=null;
+    console.log("NOT BUSBOY");
+
+ 
+
+    try {
+        const ftp=new FTP()
+    await ftp.connect1()
+
+
+    const files=req.body.files
+    let response=[]
+    for (let i = 0; i< files.length; i++) {
+        const file =files[i];
+        try{
+            await ftp.createFile(file.data,file.name)
+            response.push({name:file.name,status:"created"})
+        }catch(error){
+            response.push({name:file.name,status:"not created"})
+        }
+        
+    }
+    ftp.endConnection()
+    res.json({status:"OK",response})
+
+    } catch (error) {
+        res.json({status:"ERROR",message:"files not uploaded"+error})
+    }
+    
+
 }
 }
 
+
+exports.search_logo=async (req, res) => {
+    try {
+
+        const ftp=new FTP()
+        await ftp.connect1()
+
+
+
+
+        const response = await axios.head(req.body.url)
+       // return response.status === 200;
+        res.json({status:response.status === 200})
+
+
+
+    } catch (error) {
+        //winston.error(`Error checking file ${this.getAssetFullPath(assetName)} existence on S3`)
+    
+        res.json({status:false})
+    }
+}
 
 exports.check_url=async (req, res) => {
     try {
         const response = await axios.head(req.body.url)
-        return response.status === 200;
+       // return response.status === 200;
+        res.json({status:response.status === 200})
     } catch (error) {
         //winston.error(`Error checking file ${this.getAssetFullPath(assetName)} existence on S3`)
-        return false
+    
+        res.json({status:false})
     }
 }
 
