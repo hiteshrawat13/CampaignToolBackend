@@ -20,30 +20,26 @@ const Busboy=require('busboy')
 
 
 exports.upload_file = async (req, res) => {
-
-
-
-  
- if(req.busboy) {
-
-    
     let socketInstance=null;
     let socket=null
+    let ftp=null
+ if(req.busboy) {
+   
      console.log("HAS BUSBOY");
-
-     
      try {
-        
-    
-    const ftp=new FTP()
-    await ftp.connect1()
+   
+
     const form = Busboy({ headers: req.headers })
+
     form.on('field', (fieldname, val)=> {
         req.body[fieldname]=val
     });
 
-    form.on("file", (fieldName, fileStream, fileName, encoding, mimeType) =>{
+    form.on("file",async  (fieldName, fileStream, fileName, encoding, mimeType) =>{
         
+  
+
+
         console.log("File:",fileName);
         console.log("on file");
         const io = req.app.get('io');
@@ -59,6 +55,20 @@ exports.upload_file = async (req, res) => {
         socket=socketInstance.adapter.nsp.sockets.get(thisSocketId)
 
 
+        if(ftp==null){
+           
+            try {
+                socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Connecting to ftp"});
+                ftp=new FTP()
+                await ftp.connect1()
+                socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Connected to ftp"});
+            } catch (error) {
+                socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Ftp connection error."});
+            }
+            
+            
+        }
+
         
         ftp.uploadFile(fileStream,fileName.filename,(progress)=>{
          //  console.log("upload progress");
@@ -71,17 +81,48 @@ exports.upload_file = async (req, res) => {
             socketInstance.emit('uploadProgress', {name:fileName.filename,progress:error});
         })
         
-    });
+        });
 
 
     form.on('finish', async() => {
 
+        if(!socketInstance){
+
+            console.log("req.body in finish",req.body.sessionId);
+            const io = req.app.get('io');
+            const sockets = req.app.get('sockets');
+            if(!sockets[req.body.sessionId]){
+                res.json({message:"Undefind client id"})
+                return;
+            }
+            const thisSocketId = sockets[req.body.sessionId];
+        
+            socketInstance = io.to(thisSocketId);
+            console.log("MY SOCKET ID",thisSocketId);
+            socket=socketInstance.adapter.nsp.sockets.get(thisSocketId)
+        }
+
+        if(ftp==null){
+           
+            try {
+                socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Connecting to ftp"});
+                ftp=new FTP()
+                await ftp.connect1()
+                socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Connected to ftp"});
+            } catch (error) {
+                socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Ftp connection error."});
+            }
+            
+            
+        }
+
 
         const files=JSON.parse(req.body.templateFiles)
-       console.log("Template Files",req.body);
+        
         let response=[]
         for (let i = 0; i< files.length; i++) {
             const file =files[i];
+            socketInstance.emit('uploadProgress', {name:file.name,progress:"creating...."} );
             try{
                 await ftp.createFile(file.data,file.name)
                 response.push({name:file.name,status:"created"})
@@ -98,49 +139,21 @@ exports.upload_file = async (req, res) => {
         ftp.endConnection();
        // socketInstance.emit('uploadProgress', 'FINISHED');
         //socketInstance.emit('uploadProgress', 'Finished');
-
+        socketInstance.emit('uploadProgress', {name:"UPLOAD_COMPLETE",progress:"UPLOAD_COMPLETE"});
         
-        socket?.disconnect()
+        //socket.disconnect()
+
     })
 
     req.pipe(form);
     } catch (error) {
         console.log(error); 
-       
-        socket?.disconnect()
+        socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Error"+error});
+       // socket?.disconnect()
     }
-}else{
-    // let socketInstance=null;
-    console.log("NOT BUSBOY");
-
- 
-
-    try {
-        const ftp=new FTP()
-    await ftp.connect1()
-
-
-    const files=req.body.files
-    let response=[]
-    for (let i = 0; i< files.length; i++) {
-        const file =files[i];
-        try{
-            await ftp.createFile(file.data,file.name)
-            response.push({name:file.name,status:"created"})
-        }catch(error){
-            response.push({name:file.name,status:"not created"})
-        }
-        
-    }
-    ftp.endConnection()
-    res.json({status:"OK",response})
-
-    } catch (error) {
-        res.json({status:"ERROR",message:"files not uploaded"+error})
-    }
-    
-
 }
+
+
 }
 
 
