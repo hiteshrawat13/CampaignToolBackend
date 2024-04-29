@@ -19,15 +19,156 @@ const axios=require("axios")
 const Busboy=require('busboy')
 
 
+// exports.upload_file = async (req, res) => {
+//     let socketInstance=null;
+//     let socket=null
+//     let ftp=null
+//  if(req.busboy) {
+   
+//      console.log("HAS BUSBOY");
+//      try {
+   
+
+//     const form = Busboy({ headers: req.headers })
+
+//     form.on('field', (fieldname, val)=> {
+//         req.body[fieldname]=val
+//     });
+
+//     form.on("file",async  (fieldName, fileStream, fileName, encoding, mimeType) =>{
+        
+  
+
+
+//         console.log("File:",fileName);
+//         console.log("on file");
+//         const io = req.app.get('io');
+//         const sockets = req.app.get('sockets');
+//         if(!sockets[req.body.sessionId]){
+//             res.json({message:"Undefind client id"})
+//             return;
+//         }
+//         const thisSocketId = sockets[req.body.sessionId];
+    
+//         socketInstance = io.to(thisSocketId);
+//         console.log("MY SOCKET ID",thisSocketId);
+//         socket=socketInstance.adapter.nsp.sockets.get(thisSocketId)
+
+
+//         if(ftp==null){
+           
+//             try {
+//                 socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Connecting to ftp"});
+//                 ftp=new FTP()
+//                 await ftp.connect1()
+//                 socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Connected to ftp"});
+//             } catch (error) {
+//                 socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Ftp connection error."});
+//             }
+            
+            
+//         }
+
+        
+//         ftp.uploadFile(fileStream,fileName.filename,(progress)=>{
+//          //  console.log("upload progress");
+//             socketInstance.emit('uploadProgress', {name:fileName.filename,progress:progress});
+//         },
+//         function onComplete(result){
+//             socketInstance.emit('uploadProgress', {name:fileName.filename,progress:result});
+//         },
+//         function onError(error){
+//             socketInstance.emit('uploadProgress', {name:fileName.filename,progress:error});
+//         })
+        
+//         });
+
+
+//     form.on('finish', async() => {
+
+//         if(!socketInstance){
+
+//             console.log("req.body in finish",req.body.sessionId);
+//             const io = req.app.get('io');
+//             const sockets = req.app.get('sockets');
+//             if(!sockets[req.body.sessionId]){
+//                 res.json({message:"Undefind client id"})
+//                 return;
+//             }
+//             const thisSocketId = sockets[req.body.sessionId];
+        
+//             socketInstance = io.to(thisSocketId);
+//             console.log("MY SOCKET ID",thisSocketId);
+//             socket=socketInstance.adapter.nsp.sockets.get(thisSocketId)
+//         }
+
+//         if(ftp==null){
+           
+//             try {
+//                 socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Connecting to ftp"});
+//                 ftp=new FTP()
+//                 await ftp.connect1()
+//                 socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Connected to ftp"});
+//             } catch (error) {
+//                 socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Ftp connection error."});
+//             }
+            
+            
+//         }
+
+
+//         const files=JSON.parse(req.body.templateFiles)
+        
+//         let response=[]
+//         for (let i = 0; i< files.length; i++) {
+//             const file =files[i];
+//             socketInstance.emit('uploadProgress', {name:file.name,progress:"creating...."} );
+//             try{
+//                 await ftp.createFile(file.data,file.name)
+//                 response.push({name:file.name,status:"created"})
+//                 socketInstance.emit('uploadProgress', {name:file.name,progress:"created"} );
+//             }catch(error){
+//                 response.push({name:file.name,status:"not created"})
+//                 socketInstance.emit('uploadProgress', {name:file.name,progress:"not created"});
+//             }
+            
+//         }
+
+//         // You can access both values and both above event handles have run before this handler.
+//         console.log("onfinish");
+//         ftp.endConnection();
+//        // socketInstance.emit('uploadProgress', 'FINISHED');
+//         //socketInstance.emit('uploadProgress', 'Finished');
+//         socketInstance.emit('uploadProgress', {name:"UPLOAD_COMPLETE",progress:"UPLOAD_COMPLETE"});
+        
+//         //socket.disconnect()
+
+//     })
+
+//     req.pipe(form);
+//     } catch (error) {
+//         console.log(error); 
+//         socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Error"+error});
+//        // socket?.disconnect()
+//     }
+// }
+
+
+// }
+
+
+
+
 exports.upload_file = async (req, res) => {
-    let socketInstance=null;
-    let socket=null
     let ftp=null
+    let response=[];
+    let socketInstance=null
+    let socket=null
  if(req.busboy) {
    
      console.log("HAS BUSBOY");
      try {
-   
+      
 
     const form = Busboy({ headers: req.headers })
 
@@ -37,120 +178,99 @@ exports.upload_file = async (req, res) => {
 
     form.on("file",async  (fieldName, fileStream, fileName, encoding, mimeType) =>{
         
-  
 
+        try{
 
-        console.log("File:",fileName);
-        console.log("on file");
-        const io = req.app.get('io');
-        const sockets = req.app.get('sockets');
-        if(!sockets[req.body.sessionId]){
-            res.json({message:"Undefind client id"})
-            return;
-        }
-        const thisSocketId = sockets[req.body.sessionId];
-    
-        socketInstance = io.to(thisSocketId);
-        console.log("MY SOCKET ID",thisSocketId);
-        socket=socketInstance.adapter.nsp.sockets.get(thisSocketId)
-
-
-        if(ftp==null){
-           
-            try {
-                socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Connecting to ftp"});
-                ftp=new FTP()
-                await ftp.connect1()
-                socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Connected to ftp"});
-            } catch (error) {
-                socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Ftp connection error."});
+            if(socketInstance==null){
+                const io = req.app.get('io');
+                const sockets = req.app.get('sockets');
+                const thisSocketId = sockets[req.body.socketId];
+                socketInstance = io.to(thisSocketId);
+                console.log("MY SOCKET ID",thisSocketId);
+                socket=socketInstance.adapter.nsp.sockets.get(thisSocketId)
             }
-            
-            
-        }
 
+           
+
+            if(ftp==null){
+                ftp=new FTP()
+                await ftp.connect1(req.body.ftpConfigName)
+            }
+    
+    
+            ftp.uploadFile(fileStream,fileName.filename,
+            function onProgress(progress){
+                socketInstance?.emit('uploadProgress', {name:fileName.filename,progress:progress});
+            },
+            function onComplete(result){
+                response.push({name:fileName.filename,status:"created"})
+                socketInstance?.emit('uploadProgress', {name:fileName.filename,progress:"created"});
+            },
+            function onError(error){
+                response.push({name:fileName.filename,status:"not created"})
+                socketInstance?.emit('uploadProgress', {name:fileName.filename,progress:"not created"});
+            })
+        }catch(error){
+            console.log("IN onFile");
+            console.log(error);
+            response.push({error})
+        }
         
-        ftp.uploadFile(fileStream,fileName.filename,(progress)=>{
-         //  console.log("upload progress");
-            socketInstance.emit('uploadProgress', {name:fileName.filename,progress:progress});
-        },
-        function onComplete(result){
-            socketInstance.emit('uploadProgress', {name:fileName.filename,progress:result});
-        },
-        function onError(error){
-            socketInstance.emit('uploadProgress', {name:fileName.filename,progress:error});
-        })
         
-        });
+    });
 
 
     form.on('finish', async() => {
 
-        if(!socketInstance){
+        try {
 
-            console.log("req.body in finish",req.body.sessionId);
-            const io = req.app.get('io');
-            const sockets = req.app.get('sockets');
-            if(!sockets[req.body.sessionId]){
-                res.json({message:"Undefind client id"})
-                return;
+            if(socketInstance==null){
+                const io = req.app.get('io');
+                const sockets = req.app.get('sockets');
+                const thisSocketId = sockets[req.body.socketId];
+                socketInstance = io.to(thisSocketId);
+                console.log("MY SOCKET ID",thisSocketId);
+                socket=socketInstance.adapter.nsp.sockets.get(thisSocketId)
             }
-            const thisSocketId = sockets[req.body.sessionId];
-        
-            socketInstance = io.to(thisSocketId);
-            console.log("MY SOCKET ID",thisSocketId);
-            socket=socketInstance.adapter.nsp.sockets.get(thisSocketId)
-        }
 
-        if(ftp==null){
-           
-            try {
-                socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Connecting to ftp"});
+            if(ftp==null){
                 ftp=new FTP()
-                await ftp.connect1()
-                socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Connected to ftp"});
-            } catch (error) {
-                socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Ftp connection error."});
+                await ftp.connect1(req.body.ftpConfigName)
             }
-            
-            
-        }
-
-
-        const files=JSON.parse(req.body.templateFiles)
-        
-        let response=[]
-        for (let i = 0; i< files.length; i++) {
-            const file =files[i];
-            socketInstance.emit('uploadProgress', {name:file.name,progress:"creating...."} );
-            try{
-                await ftp.createFile(file.data,file.name)
-                response.push({name:file.name,status:"created"})
-                socketInstance.emit('uploadProgress', {name:file.name,progress:"created"} );
-            }catch(error){
-                response.push({name:file.name,status:"not created"})
-                socketInstance.emit('uploadProgress', {name:file.name,progress:"not created"});
+    
+            const files=JSON.parse(req.body.templateFiles)
+           
+            for (let i = 0; i< files.length; i++) {
+                const file =files[i];
+                try{
+                    await ftp.createFile(file.data,file.name)
+                    response.push({name:file.name,status:"created"})
+                    socketInstance?.emit('uploadProgress', {name:file.name,progress:"created"});
+                }catch(error){
+                    response.push({name:file.name,status:"not created"})
+                    socketInstance?.emit('uploadProgress', {name:file.name,progress:"not created"});
+                }
             }
-            
+            console.log("onfinish");
+            ftp.endConnection();
+            res.json(response)
+        } catch (error) { 
+            console.log(error);
+            response.push({error})
+            res.json(response)
         }
-
-        // You can access both values and both above event handles have run before this handler.
-        console.log("onfinish");
-        ftp.endConnection();
-       // socketInstance.emit('uploadProgress', 'FINISHED');
-        //socketInstance.emit('uploadProgress', 'Finished');
-        socketInstance.emit('uploadProgress', {name:"UPLOAD_COMPLETE",progress:"UPLOAD_COMPLETE"});
-        
-        //socket.disconnect()
-
     })
 
     req.pipe(form);
     } catch (error) {
         console.log(error); 
-        socketInstance.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Error"+error});
-       // socket?.disconnect()
+        response.push({error})
+        res.json(response)
+        
     }
+}else{
+    response.push({error:"NOT Busboy "})
+    res.json(response)
 }
 
 
@@ -162,19 +282,11 @@ exports.search_logo=async (req, res) => {
 
         const ftp=new FTP()
         await ftp.connect1()
-
-
-
-
         const response = await axios.head(req.body.url)
        // return response.status === 200;
         res.json({status:response.status === 200})
-
-
-
     } catch (error) {
         //winston.error(`Error checking file ${this.getAssetFullPath(assetName)} existence on S3`)
-    
         res.json({status:false})
     }
 }

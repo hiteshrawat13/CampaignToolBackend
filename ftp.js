@@ -5,58 +5,67 @@ const Client = require('ftp');
 class FTP{
 
     constructor(){
+        this.configs=new Map()
+        
         //NEW-TGIF
-        this.config={
+        this.configs.set("TGIF",{
             host:"92.204.129.232", // The hostname or IP address of the FTP server. Default: 'localhost'
             port:21, // The port of the FTP server. Default: 21
             secure:false,//Set to true for both control and data connection encryption, 'control' for control connection encryption only, or 'implicit' for implicitly encrypted control connection (this mode is deprecated in modern times, but usually uses port 990) Default: false
             user:"whitepapers@resource.itbusinesstoday.com",
             password: 'Pilot@2023?',
             path:"download"
-        }
+        })
+       
 
-        //ITBP V2
-        // this.config={
-        //     host:"192.46.219.45", // The hostname or IP address of the FTP server. Default: 'localhost'
-        //     port:21, // The port of the FTP server. Default: 21
-        //     secure:false,//Set to true for both control and data connection encryption, 'control' for control connection encryption only, or 'implicit' for implicitly encrypted control connection (this mode is deprecated in modern times, but usually uses port 990) Default: false
-        //     user:"itbpnet@itbusinessplus.net",
-        //     password: 'Pilot@2023?',
-        //     path:"template/hitesh/test"
-        // }
+        //NEW-TGIF
+        this.configs.set("ITBP",{
+            host:"192.46.219.45", // The hostname or IP address of the FTP server. Default: 'localhost'
+            port:21, // The port of the FTP server. Default: 21
+            secure:false,//Set to true for both control and data connection encryption, 'control' for control connection encryption only, or 'implicit' for implicitly encrypted control connection (this mode is deprecated in modern times, but usually uses port 990) Default: false
+            user:"itbpnet@itbusinessplus.net",
+            password: 'Pilot@2023?',
+            path:"template/hitesh/test"
+        })
 
-        // this.config={
-        //     host:"127.0.0.1", // The hostname or IP address of the FTP server. Default: 'localhost'
-        //     port:21, // The port of the FTP server. Default: 21
-        //     secure:false,//Set to true for both control and data connection encryption, 'control' for control connection encryption only, or 'implicit' for implicitly encrypted control connection (this mode is deprecated in modern times, but usually uses port 990) Default: false
-        //     user:"hitesh",
-        //     password: 'Hitesh@448374',
-        //     path:"ftp"
-        // }
+        //TEST
+        this.configs.set("TEST",{
+            host:"127.0.0.1", // The hostname or IP address of the FTP server. Default: 'localhost'
+            port:21, // The port of the FTP server. Default: 21
+            secure:false,//Set to true for both control and data connection encryption, 'control' for control connection encryption only, or 'implicit' for implicitly encrypted control connection (this mode is deprecated in modern times, but usually uses port 990) Default: false
+            user:"hitesh",
+            password: 'Hitesh@448374',
+            path:"ftp"
+        })
+
     }
 
-    connect1(){
+    connect1(FTP_CONFIG_NAME){
         
 
+        this.config=this.configs.get(FTP_CONFIG_NAME)
         return new Promise((resolve,reject)=>{
-            var c = new Client();
-            c.connect(this.config);
-            this.c=c;
-            c.on('ready', ()=> {
-                resolve("connected")
-                console.log("Conn");
-            })
-
-            c.on('error', (error)=> {
+            try{
+                var c = new Client();
+                c.connect(this.config);
+                this.c=c;
+                c.on('ready', ()=> {
+                    resolve("connected")
+                    console.log("Conn");
+                })
+    
+                c.on('error', (error)=> {
+                    reject(error)
+                })
+            }catch(error){
                 reject(error)
-            })
+            }
+           
         })
     }
 
     createFile(fileData,fileName){
         return new Promise((resolve,reject)=>{
-
-
            // console.log("in create file");
             const buff = Buffer.from(fileData, "utf-8");
             
@@ -78,7 +87,8 @@ class FTP{
 
     endConnection(){
         console.log("Ended");
-        this.c.end(); //end ftp connection
+        //this.c.end(); //end ftp connection
+        this.c.destroy(); 
     }
 
     uploadFile(fileStream,fileName,onProgress,onComplete,onError) {
