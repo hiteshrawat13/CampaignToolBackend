@@ -3,7 +3,7 @@ const Client = require('ftp');
 
 
 class FTP{
-
+    connected=false
     constructor(){
         this.configs=new Map()
         
@@ -52,6 +52,7 @@ class FTP{
                 c.on('ready', ()=> {
                     resolve("connected")
                     console.log("Conn");
+                    this.connected=true
                 })
     
                 c.on('error', (error)=> {
@@ -89,6 +90,7 @@ class FTP{
         console.log("Ended");
         //this.c.end(); //end ftp connection
         this.c.destroy(); 
+        this.connected=false
     }
 
     uploadFile(fileStream,fileName,onProgress,onComplete,onError) {

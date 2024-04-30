@@ -158,9 +158,9 @@ const Busboy=require('busboy')
 
 
 
-
+const delay = time => new Promise(res=>setTimeout(res,time));
 exports.upload_file = async (req, res) => {
-    let ftp=null
+    let ftp=new FTP()
     let response=[];
     let socketInstance=null
     let socket=null
@@ -172,12 +172,19 @@ exports.upload_file = async (req, res) => {
 
     const form = Busboy({ headers: req.headers })
 
-    form.on('field', (fieldname, val)=> {
+    form.on('field', async (fieldname, val)=> {
         req.body[fieldname]=val
+
+        console.log("onField",new Date());
+
+        await delay(50000)
     });
 
     form.on("file",async  (fieldName, fileStream, fileName, encoding, mimeType) =>{
         
+        console.log("onFile",new Date());
+
+        console.log("------------",fileName,fieldName);
 
         try{
 
@@ -192,13 +199,15 @@ exports.upload_file = async (req, res) => {
 
            
 
-            if(ftp==null){
-                ftp=new FTP()
+            if(ftp.connected==false){
+               console.log("ftp connect called in onFile");
                 await ftp.connect1(req.body.ftpConfigName)
+                delay(10000)
+                console.log("delat 10000");
             }
     
     
-            ftp.uploadFile(fileStream,fileName.filename,
+            ftp.uploadFile(fileStream,(req.body.logoFile && req.body.logoFile==fileName.filename)?"logo/"+fileName.filename:fileName.filename,
             function onProgress(progress){
                 socketInstance?.emit('uploadProgress', {name:fileName.filename,progress:progress});
             },
@@ -233,8 +242,9 @@ exports.upload_file = async (req, res) => {
                 socket=socketInstance.adapter.nsp.sockets.get(thisSocketId)
             }
 
-            if(ftp==null){
-                ftp=new FTP()
+            if(ftp.connected==false){
+               
+                console.log("ftp connect called in onFinish");
                 await ftp.connect1(req.body.ftpConfigName)
             }
     
