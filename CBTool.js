@@ -46,7 +46,6 @@ io.on("connection", (socket) => {
   console.log(`Client connected: ${socket.id}`)
 
 
-
   socket.emit("foo", {id:socket.id})
 
   socket.on("connectInit", (sessionId) => {
@@ -62,7 +61,6 @@ io.on("connection", (socket) => {
     //connections.delete(s);
     delete sockets[socket.id];
     console.log("Client socket disconnected -----");
-  
   });
 
  
