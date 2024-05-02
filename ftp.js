@@ -51,7 +51,7 @@ class FTP{
                 this.c=c;
                 c.on('ready', ()=> {
                     resolve("connected")
-                    console.log("Conn");
+                    console.log("ftp connected "+FTP_CONFIG_NAME);
                     this.connected=true
                 })
     

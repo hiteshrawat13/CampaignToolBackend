@@ -165,48 +165,45 @@ exports.upload_file = async (req, res) => {
     let socketInstance=null
     let socket=null
  if(req.busboy) {
-   
-     console.log("HAS BUSBOY");
-     try {
-      
+
+    
+    try {
+    console.log("HAS BUSBOY");
+
+  
+    try{
+        const io = req.app.get('io');
+        const sockets = req.app.get('sockets');
+        const thisSocketId = sockets[req.params.socketId];
+        socketInstance = io.to(thisSocketId);
+        console.log("MY SOCKET ID",thisSocketId);
+        socket=socketInstance.adapter.nsp.sockets.get(thisSocketId)
+    }catch(error){
+        response.push({status:"socket error",message:error})
+        console.log(error);
+    }
+ 
+    socketInstance?.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"Connecting to FTP : "+req.params.ftpConfigName});
+    console.log("ftp connect called in onFile");
+    const ftpstatus=await ftp.connect1(req.params.ftpConfigName)
+    console.log("ftp connected "+ftpstatus);
+    socketInstance?.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"FTP connected : "+req.params.ftpConfigName});
+
+
+
 
     const form = Busboy({ headers: req.headers })
 
     form.on('field', async (fieldname, val)=> {
         req.body[fieldname]=val
-
-        console.log("onField",new Date());
-
-        await delay(50000)
     });
 
     form.on("file",async  (fieldName, fileStream, fileName, encoding, mimeType) =>{
         
-        console.log("onFile",new Date());
-
         console.log("------------",fileName,fieldName);
 
         try{
 
-            if(socketInstance==null){
-                const io = req.app.get('io');
-                const sockets = req.app.get('sockets');
-                const thisSocketId = sockets[req.body.socketId];
-                socketInstance = io.to(thisSocketId);
-                console.log("MY SOCKET ID",thisSocketId);
-                socket=socketInstance.adapter.nsp.sockets.get(thisSocketId)
-            }
-
-           
-
-            if(ftp.connected==false){
-               console.log("ftp connect called in onFile");
-                await ftp.connect1(req.body.ftpConfigName)
-                delay(10000)
-                console.log("delat 10000");
-            }
-    
-    
             ftp.uploadFile(fileStream,(req.body.logoFile && req.body.logoFile==fileName.filename)?"logo/"+fileName.filename:fileName.filename,
             function onProgress(progress){
                 socketInstance?.emit('uploadProgress', {name:fileName.filename,progress:progress});
@@ -233,21 +230,6 @@ exports.upload_file = async (req, res) => {
 
         try {
 
-            if(socketInstance==null){
-                const io = req.app.get('io');
-                const sockets = req.app.get('sockets');
-                const thisSocketId = sockets[req.body.socketId];
-                socketInstance = io.to(thisSocketId);
-                console.log("MY SOCKET ID",thisSocketId);
-                socket=socketInstance.adapter.nsp.sockets.get(thisSocketId)
-            }
-
-            if(ftp.connected==false){
-               
-                console.log("ftp connect called in onFinish");
-                await ftp.connect1(req.body.ftpConfigName)
-            }
-    
             const files=JSON.parse(req.body.templateFiles)
            
             for (let i = 0; i< files.length; i++) {
@@ -263,6 +245,8 @@ exports.upload_file = async (req, res) => {
             }
             console.log("onfinish");
             ftp.endConnection();
+            socketInstance?.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"FTP ended : "+req.params.ftpConfigName});
+
             res.json(response)
         } catch (error) { 
             console.log(error);
@@ -276,7 +260,6 @@ exports.upload_file = async (req, res) => {
         console.log(error); 
         response.push({error})
         res.json(response)
-        
     }
 }else{
     response.push({error:"NOT Busboy "})

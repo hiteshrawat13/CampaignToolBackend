@@ -11,7 +11,7 @@ const mainController = require('../controllers/main.controller.js')
 
 const {authenticate}=require("../middlewares/authenticate.js")
 
-router.post('/upload_file',mainController.upload_file)
+router.post('/upload_file/:ftpConfigName/:socketId',mainController.upload_file)
 router.post('/check_url',mainController.check_url)
 
 router.post('/campaign/create',mainController.create_campaign)
