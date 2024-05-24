@@ -3,7 +3,7 @@ const Client = require('ftp');
 
 
 class FTP{
-    connected=false
+
     constructor(){
         this.configs=new Map()
         
@@ -26,6 +26,26 @@ class FTP{
             user:"itbpnet@itbusinessplus.net",
             password: 'Pilot@2023?',
             path:"template/hitesh/test"
+        })
+
+                //NEW-ITBP
+                this.configs.set("NEW-ITBP",{
+                    host:"92.204.129.232", // The hostname or IP address of the FTP server. Default: 'localhost'
+                    port:21, // The port of the FTP server. Default: 21
+                    secure:false,//Set to true for both control and data connection encryption, 'control' for control connection encryption only, or 'implicit' for implicitly encrypted control connection (this mode is deprecated in modern times, but usually uses port 990) Default: false
+                    user:"whitepaper@resource.itbusinessplus.com",
+                    password: 'Pilot@2023?',
+                    path:"cbtooltest"
+                })
+
+                        //EU-ITBP
+        this.configs.set("EU-ITBP",{
+            host:"eu.itbusinessplus.com", // The hostname or IP address of the FTP server. Default: 'localhost'
+            port:21, // The port of the FTP server. Default: 21
+            secure:false,//Set to true for both control and data connection encryption, 'control' for control connection encryption only, or 'implicit' for implicitly encrypted control connection (this mode is deprecated in modern times, but usually uses port 990) Default: false
+            user:"edm@eu.itbusinessplus.com",
+            password: 'Pilot@2023?',
+            path:"test"
         })
 
         //TEST
@@ -51,8 +71,7 @@ class FTP{
                 this.c=c;
                 c.on('ready', ()=> {
                     resolve("connected")
-                    console.log("ftp connected "+FTP_CONFIG_NAME);
-                    this.connected=true
+                    console.log("Conn");
                 })
     
                 c.on('error', (error)=> {
@@ -90,7 +109,6 @@ class FTP{
         console.log("Ended");
         //this.c.end(); //end ftp connection
         this.c.destroy(); 
-        this.connected=false
     }
 
     uploadFile(fileStream,fileName,onProgress,onComplete,onError) {

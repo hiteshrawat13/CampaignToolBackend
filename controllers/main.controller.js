@@ -7,7 +7,6 @@ const jwt=require("jsonwebtoken")
 // const {CampaignModel}=require("../models/Campaign.js")
 
 var Stream = require('stream');
-const { LinkModel } = require('../models/Link.js')
 //const ftp = require("basic-ftp") 
 // const jwt =require('jsonwebtoken')
 // Upload csv to mysql db
@@ -18,6 +17,8 @@ const axios=require("axios")
 
 const Busboy=require('busboy')
 
+const {campListModel}  = require("../models/campList.js");
+const {LinkModel}  = require("../models/Link.js");
 
 // exports.upload_file = async (req, res) => {
 //     let socketInstance=null;
@@ -158,19 +159,244 @@ const Busboy=require('busboy')
 
 
 
+
+// exports.upload_file = async (req, res) => {
+
+
+
+
+//     let ftp=null
+//     let response=[];
+//     let socketInstance=null
+//     let socket=null
+//  if(req.busboy) {
+   
+//      console.log("HAS BUSBOY");
+//      try {
+      
+
+//     const form = Busboy({ headers: req.headers })
+
+//     form.on('field', (fieldname, val)=> {
+//         req.body[fieldname]=val
+//     });
+
+//     form.on("file",async  (fieldName, fileStream, fileName, encoding, mimeType) =>{
+        
+
+//         try{
+
+//             if(socketInstance==null){
+//                 const io = req.app.get('io');
+//                 const sockets = req.app.get('sockets');
+//                 const thisSocketId = sockets[req.body.socketId];
+//                 socketInstance = io.to(thisSocketId);
+//                 console.log("MY SOCKET ID",thisSocketId);
+//                 socket=socketInstance.adapter.nsp.sockets.get(thisSocketId)
+//             }
+
+           
+
+//             if(ftp==null){
+//                 ftp=new FTP()
+//                 await ftp.connect1(req.body.ftpConfigName)
+//             }
+    
+    
+//             ftp.uploadFile(fileStream,(req.body.logoFile && req.body.logoFile==fileName.filename)?"logo/"+fileName.filename:fileName.filename,
+//             function onProgress(progress){
+//                 socketInstance?.emit('uploadProgress', {name:fileName.filename,progress:progress});
+//             },
+//             function onComplete(result){
+//                 response.push({name:fileName.filename,status:"created"})
+//                 socketInstance?.emit('uploadProgress', {name:fileName.filename,progress:"created"});
+//             },
+//             function onError(error){
+//                 response.push({name:fileName.filename,status:"not created"})
+//                 socketInstance?.emit('uploadProgress', {name:fileName.filename,progress:"not created"});
+//             })
+//         }catch(error){
+//             console.log("IN onFile");
+//             console.log(error);
+//             response.push({error})
+//         }
+        
+        
+//     });
+
+
+//     form.on('finish', async() => {
+
+//         try {
+
+//             if(socketInstance==null){
+//                 const io = req.app.get('io');
+//                 const sockets = req.app.get('sockets');
+//                 const thisSocketId = sockets[req.body.socketId];
+//                 socketInstance = io.to(thisSocketId);
+//                 console.log("MY SOCKET ID",thisSocketId);
+//                 socket=socketInstance.adapter.nsp.sockets.get(thisSocketId)
+//             }
+
+//             if(ftp==null){
+//                 ftp=new FTP()
+//                 await ftp.connect1(req.body.ftpConfigName)
+//             }
+    
+//             const files=JSON.parse(req.body.templateFiles)
+           
+//             for (let i = 0; i< files.length; i++) {
+//                 const file =files[i];
+//                 try{
+//                     await ftp.createFile(file.data,file.name)
+//                     response.push({name:file.name,status:"created"})
+//                     socketInstance?.emit('uploadProgress', {name:file.name,progress:"created"});
+//                 }catch(error){
+//                     response.push({name:file.name,status:"not created"})
+//                     socketInstance?.emit('uploadProgress', {name:file.name,progress:"not created"});
+//                 }
+//             }
+//             console.log("onfinish");
+//             ftp.endConnection();
+
+
+//             // BELOW CODE IS TO SAVE LINK DETAILS IN DATABASE ========================================================
+           
+
+//             let [record, created] = await campListModel.findOrCreate({
+//                 where:{
+//                   camp_name:campData.campname,
+//                 },
+//                 defaults: { 
+//                     camp_name:campData.campname,	
+//                     camp_id:campData.campid,
+//                     Category:campData.category,
+//                     Client_Code:campData.clientcode,
+//                     Country:campData.country,
+//                     camp_Created_By:campData.linkcreatedby,
+//                     last_edited_By:campData.editedby,
+//                 }
+//               });
+    
+//               if (!created) {
+//                 // If record exists, update it
+//                 let [record1, created1] = await LinkModel.create({
+                    
+//                         camp_name:campData.campname,	
+//                         link_title:campData.linktitle,
+//                         link:campData.link,
+//                         language:campData.language,
+//                         Link_Created_By:campData.linkcreatedby,
+                    
+//                   });
+
+//               }
+
+//             //   let campData = JSON.parse(req.body.campdata); 
+
+//               let created2 = await LinkModel.create({
+              
+//                     camp_name:campData.campname,	
+//                     link_title:campData.linktitle,
+//                     link:campData.link,
+//                     language:campData.language,
+//                     Link_Created_By:campData.linkcreatedby,
+                
+//               });
+             
+
+//             // ========================================================================================================
+
+
+//             res.json(response)
+//         } catch (error) { 
+//             console.log(error);
+//             response.push({error})
+//             res.json(response)
+//         }
+//     })
+
+//     req.pipe(form);
+//     } catch (error) {
+//         console.log(error); 
+//         response.push({error})
+//         res.json(response)
+        
+//     }
+// }else{
+//     response.push({error:"NOT Busboy "})
+//     res.json(response)
+// }
+
+
+// }
+
+
+
+
+
+
+
+const saveLinkToDatabase=async (campData)=>{
+                // BELOW CODE IS TO SAVE LINK DETAILS IN DATABASE ========================================================
+            let [record, created] = await campListModel.findOrCreate({
+                where:{
+                  camp_name:campData.campname,
+                },
+                defaults: { 
+                    camp_name:campData.campname,	
+                    camp_id:campData.campid,
+                    Category:campData.category,
+                    Client_Code:campData.clientcode,
+                    Country:campData.country,
+                    camp_Created_By:campData.linkcreatedby,
+                    last_edited_By:campData.editedby,
+                }
+              });
+    
+              if (!created) {
+                // If record exists, update it
+                let [record1, created1] = await LinkModel.create({
+                    
+                        camp_name:campData.campname,	
+                        link_title:campData.linktitle,
+                        link:campData.link,
+                        language:campData.language,
+                        Link_Created_By:campData.linkcreatedby,
+                    
+                  });
+
+              }
+            //   let campData = JSON.parse(req.body.campdata); 
+              let created2 = await LinkModel.create({
+              
+                    camp_name:campData.campname,	
+                    link_title:campData.linktitle,
+                    link:campData.link,
+                    language:campData.language,
+                    Link_Created_By:campData.linkcreatedby,
+                
+              });
+            // ========================================================================================================
+
+
+}
+
+
 const delay = time => new Promise(res=>setTimeout(res,time));
 exports.upload_file = async (req, res) => {
     let ftp=new FTP()
     let response=[];
     let socketInstance=null
     let socket=null
+
+    let errorCount=0;
  if(req.busboy) {
 
     
     try {
     console.log("HAS BUSBOY");
 
-  
     try{
         const io = req.app.get('io');
         const sockets = req.app.get('sockets');
@@ -215,6 +441,7 @@ exports.upload_file = async (req, res) => {
             function onError(error){
                 response.push({name:fileName.filename,status:"not created"})
                 socketInstance?.emit('uploadProgress', {name:fileName.filename,progress:"not created"});
+                errorCount++;
             })
         }catch(error){
             console.log("IN onFile");
@@ -241,13 +468,37 @@ exports.upload_file = async (req, res) => {
                 }catch(error){
                     response.push({name:file.name,status:"not created"})
                     socketInstance?.emit('uploadProgress', {name:file.name,progress:"not created"});
+                    errorCount++;
+                    console.log("-----------IIII---------");
                 }
             }
             console.log("onfinish");
             ftp.endConnection();
             socketInstance?.emit('uploadProgress', {name:"UPLOAD_PROGRESS",progress:"FTP ended : "+req.params.ftpConfigName});
 
+
+
+            
+            try {
+                if(errorCount==0){
+                    let campData = JSON.parse(req.body.campdata); 
+                    await  saveLinkToDatabase(campData)
+                }else{
+                    console.log("ErrorCount--:",errorCount);
+                }
+                
+            } catch (error) {
+                response.push({error})
+            }
+
             res.json(response)
+
+
+
+
+            
+
+
         } catch (error) { 
             console.log(error);
             response.push({error})
@@ -268,6 +519,8 @@ exports.upload_file = async (req, res) => {
 
 
 }
+
+
 
 
 exports.search_logo=async (req, res) => {
