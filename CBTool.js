@@ -11,7 +11,7 @@ var busboy = require('connect-busboy');
 app.use(busboy());
 
 //app.use(cors({credentials: true, origin: ['http://localhost/']}))
-app.use(cors({origin: 'http://localhost:5173'}));
+app.use(cors({origin: ['http://localhost','http://localhost:5173','http://192.168.31.13:5173','http://192.168.28.93:5173']}));
 // app.use(cookieParser());
 app.use(express.json() );
 //app.use(express.static('public'))

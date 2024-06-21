@@ -263,3 +263,46 @@ exports.deleteLinks= async (req,res)=>{
             });
        }
     }
+
+
+
+
+
+
+
+
+
+
+    // ------------------------------------------------
+    exports.createCampaign=   (req,res)=>{
+   
+       
+
+
+        console.log("REQ:",req.body);
+  
+
+    
+        campListModel.create({
+    
+            camp_id	:req.body.campaignId,	
+            camp_name:req.body.campaignName,	
+            Category:req.body.category,	
+            Client_Code:req.body.clientCode,
+            Country:req.body.country,
+            camp_Created_By:req.body.campCreatedBy,
+            last_edited_By:req.body.lastEditedBy,
+            comment	:req.body.comment,
+    
+        }).then(function(item){
+            res.json({
+                message: "Campaign added successfully!",
+            });
+          }).catch(function (err) {
+            res.json({message: `Unable to add! ${err}` });
+          });
+    
+  
+    
+    
+    }

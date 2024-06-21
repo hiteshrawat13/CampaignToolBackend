@@ -12,6 +12,10 @@ const mainController = require('../controllers/main.controller.js')
 const {authenticate}=require("../middlewares/authenticate.js")
 
 
+
+router.post('/grab_tgif_client_link_form',mainController.grab_tgif_client_link_form)
+
+
 router.post('/campaign/create',mainController.create_campaign)
 router.post('/link/create',mainController.create_link)
 router.post('/link/update',mainController.update_link)

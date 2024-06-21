@@ -377,6 +377,19 @@ const saveLinkToDatabase=async (campData)=>{
                     Link_Created_By:campData.linkcreatedby,
                 
               });
+
+
+              let created23 = await LinkModel.create({
+              
+                camp_name:Math.random()+"CAMPNAME",	
+                link_title:"TITLE",
+                link:"LINK",
+                language:"EN_US",
+                Link_Created_By:"campData.linkcreatedby",
+            
+          });
+          console.log("created2 --------------------------: ");
+              console.log("created2 : ",created23);
             // ========================================================================================================
 
 
@@ -488,6 +501,7 @@ exports.upload_file = async (req, res) => {
                 }
                 
             } catch (error) {
+                console.log("ErrorCount--:",errorCount);
                 response.push({error})
             }
 
@@ -521,33 +535,46 @@ exports.upload_file = async (req, res) => {
 }
 
 
-
-
-exports.search_logo=async (req, res) => {
+exports.grab_tgif_client_link_form=async (req, res) => {
     try {
 
-        const ftp=new FTP()
-        await ftp.connect1()
-        const response = await axios.head(req.body.url)
+       
+        const response = await axios.get(req.body.link)
        // return response.status === 200;
-        res.json({status:response.status === 200})
+        res.json({status:response.status === 200,response:response.data})
     } catch (error) {
         //winston.error(`Error checking file ${this.getAssetFullPath(assetName)} existence on S3`)
-        res.json({status:false})
+        res.json({status:false,error:error,wewe:"WWWWWWWWWWWWWW"})
+        console.log(error);
     }
 }
 
-exports.check_url=async (req, res) => {
-    try {
-        const response = await axios.head(req.body.url)
-       // return response.status === 200;
-        res.json({status:response.status === 200})
-    } catch (error) {
-        //winston.error(`Error checking file ${this.getAssetFullPath(assetName)} existence on S3`)
+
+// exports.search_logo=async (req, res) => {
+//     try {
+
+//         const ftp=new FTP()
+//         await ftp.connect1()
+//         const response = await axios.get(req.body.url)
+//        // return response.status === 200;
+//         res.json({status:response.status === 200})
+//     } catch (error) {
+//         //winston.error(`Error checking file ${this.getAssetFullPath(assetName)} existence on S3`)
+//         res.json({status:false})
+//     }
+// }
+
+// exports.check_url=async (req, res) => {
+//     try {
+//         const response = await axios.head(req.body.url)
+//        // return response.status === 200;
+//         res.json({status:response.status === 200})
+//     } catch (error) {
+//         //winston.error(`Error checking file ${this.getAssetFullPath(assetName)} existence on S3`)
     
-        res.json({status:false})
-    }
-}
+//         res.json({status:false})
+//     }
+// }
 
 
 
