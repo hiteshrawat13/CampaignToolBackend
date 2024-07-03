@@ -63,8 +63,6 @@ io.on("connection", (socket) => {
     console.log("Client socket disconnected -----");
   });
 
- 
-
 })
 
 // The io instance is set in Express so it can be grabbed in a route

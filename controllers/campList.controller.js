@@ -48,6 +48,7 @@ const result = await campListModel.findAndCountAll({
   order: [
       ['createdAt', 'DESC']
   ],
+  
   ...paginate({
       currentPage,
       pageSize: perPage
@@ -296,10 +297,11 @@ exports.deleteLinks= async (req,res)=>{
     
         }).then(function(item){
             res.json({
+                status:200,
                 message: "Campaign added successfully!",
             });
           }).catch(function (err) {
-            res.json({message: `Unable to add! ${err}` });
+            res.json({status:500,message: `Unable to add! ${err}` });
           });
     
   

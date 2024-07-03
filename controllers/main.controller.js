@@ -439,10 +439,14 @@ exports.upload_file = async (req, res) => {
 
     form.on("file",async  (fieldName, fileStream, fileName, encoding, mimeType) =>{
         
-        console.log("------------",fileName,fieldName);
+       
 
         try{
 
+
+            console.log("------START-----\n",req.body,"\n---END---");
+
+            console.log("ISVALIDLOGO",req.body.logoFile && req.body.logoFile==fileName.filename);
             ftp.uploadFile(fileStream,(req.body.logoFile && req.body.logoFile==fileName.filename)?"logo/"+fileName.filename:fileName.filename,
             function onProgress(progress){
                 socketInstance?.emit('uploadProgress', {name:fileName.filename,progress:progress});

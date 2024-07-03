@@ -4,7 +4,6 @@ const { DataTypes,Sequelize } = require("sequelize");
 const campListModel = sequelize.define(
     "campLists",
     {
-
         // Our primaryKey, book id, our unique identifier
         id: {
             type: Sequelize.INTEGER,
@@ -12,12 +11,10 @@ const campListModel = sequelize.define(
             primaryKey: true,
             allowNull: false
         },
-
         camp_id: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-
         camp_name: {
             type: DataTypes.STRING,
             allowNull: false,
