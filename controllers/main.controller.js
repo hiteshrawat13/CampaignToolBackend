@@ -554,6 +554,16 @@ exports.grab_tgif_client_link_form=async (req, res) => {
 }
 
 
+
+exports.update_link= (req, res) => {
+    console.log("EEEEEEEEEEEEEEEEEEEEEE");
+    res.send("EEEEEEEEEEEEEE")
+}
+
+
+
+
+
 // exports.search_logo=async (req, res) => {
 //     try {
 

@@ -14,6 +14,10 @@ const mainController = require('../controllers/main.controller.js')
 const {authenticate}=require("../middlewares/authenticate.js")
 
 
+
+
+router.get('/save' ,mainController.update_link)
+
 router.post('/campaign/create',mainController.create_campaign)
 router.post('/link/create',mainController.create_link)
 router.post('/link/update',mainController.update_link)
@@ -25,6 +29,8 @@ router.post('/upload',mainController.ftptest)
 router.get('/authenticate',authenticate,(req,res)=>{
     res.send("OK")
 })
+
+
 
 
 // router.get('/get_data', function(req, res, next){

@@ -26,6 +26,24 @@ app.use('/user', userRouter)
 app.use('/camplist', campListRouter)
 
 
+
+///for testing only
+// app.get('/hi', (req, res) => {
+
+
+//   res.sendFile("./Helper.js", { root: __dirname },function (err) {
+//       if (err) {
+//           console.error('Error sending file:', err);
+//       } else {
+//           console.log('Sent:', "./Helper.js");
+//       }
+//   });
+// })
+
+
+
+
+
 const PORT=8888
 const server=app.listen(PORT, () => {
     console.log(`server is listening on port ${PORT} : http://localhost:${PORT}/`)
