@@ -351,45 +351,37 @@ const saveLinkToDatabase=async (campData)=>{
                     Country:campData.country,
                     camp_Created_By:campData.linkcreatedby,
                     last_edited_By:campData.editedby,
+                    json_data:campData.json_data
                 }
               });
     
               if (!created) {
                 // If record exists, update it
-                let [record1, created1] = await LinkModel.create({
+                let [record1, created1] = await LinkModel.upsert({
                     
                         camp_name:campData.campname,	
                         link_title:campData.linktitle,
                         link:campData.link,
                         language:campData.language,
                         Link_Created_By:campData.linkcreatedby,
-                    
+                        json_data:campData.json_data
                   });
 
               }
             //   let campData = JSON.parse(req.body.campdata); 
-              let created2 = await LinkModel.create({
+              let created2 = await LinkModel.upsert({
               
                     camp_name:campData.campname,	
                     link_title:campData.linktitle,
                     link:campData.link,
                     language:campData.language,
                     Link_Created_By:campData.linkcreatedby,
-                
+                    json_data:campData.json_data
               });
+              console.log("Link created",link);
 
 
-              let created23 = await LinkModel.create({
-              
-                camp_name:Math.random()+"CAMPNAME",	
-                link_title:"TITLE",
-                link:"LINK",
-                language:"EN_US",
-                Link_Created_By:"campData.linkcreatedby",
-            
-          });
-          console.log("created2 --------------------------: ");
-              console.log("created2 : ",created23);
+          
             // ========================================================================================================
 
 
@@ -499,6 +491,7 @@ exports.upload_file = async (req, res) => {
             try {
                 if(errorCount==0){
                     let campData = JSON.parse(req.body.campdata); 
+                    
                     await  saveLinkToDatabase(campData)
                 }else{
                     console.log("ErrorCount--:",errorCount);
@@ -510,12 +503,6 @@ exports.upload_file = async (req, res) => {
             }
 
             res.json(response)
-
-
-
-
-            
-
 
         } catch (error) { 
             console.log(error);

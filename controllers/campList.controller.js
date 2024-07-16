@@ -308,3 +308,24 @@ exports.deleteLinks= async (req,res)=>{
     
     
     }
+
+
+
+    exports.getLinkJsonData=  async  (req,res)=>{
+ 
+        try{
+
+            const links = await LinkModel.findOne(
+                {
+                    where: {id: req.query.id},
+                }
+            )
+        
+              return  res.status(200).json(links);
+        
+            }catch(error){
+                return res.json({
+                    message: `Unable to get json data! ${error}`,
+                 });
+            }
+    }

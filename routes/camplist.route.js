@@ -29,6 +29,7 @@ campListRouter.post('/addExtraLinks', campListController.addExtraLinks);
 
 
 campListRouter.post('/createCampaign', campListController.createCampaign);
+campListRouter.post('/getLinkJsonData', campListController.getLinkJsonData);
 
 
 

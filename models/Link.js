@@ -38,7 +38,7 @@ const LinkModel = sequelize.define(
          allowNull: false,
       },
    
-        camp_name: {
+      camp_name: {
          type: DataTypes.STRING,
          allowNull: false,
          references: {
@@ -46,6 +46,12 @@ const LinkModel = sequelize.define(
             key: "camp_name",
           },
       },
+
+      json_data:{
+         type: Sequelize.TEXT('long'),
+         allowNull: true,
+      }
+
 
    }
 );

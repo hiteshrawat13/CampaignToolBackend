@@ -15,7 +15,9 @@ const sequelize = new Sequelize("cbtool", "root", "12345", {
 
 (async () => {
     try {
-        await sequelize.sync();
+        await sequelize.sync({
+            // force:"true"
+        });
     } catch (e) {
        console.log(e,"SEQUALIZE SYNC");
     }
