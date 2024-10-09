@@ -50,8 +50,12 @@ const LinkModel = sequelize.define(
       json_data:{
          type: Sequelize.TEXT('long'),
          allowNull: true,
-      }
+      },
 
+      is_published: {
+         type: DataTypes.INTEGER,
+         allowNull: true,
+      },
 
    }
 );

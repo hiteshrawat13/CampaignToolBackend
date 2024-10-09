@@ -388,6 +388,25 @@ const saveLinkToDatabase=async (campData)=>{
 }
 
 
+exports.save_link=async (req, res) =>{
+  
+    let campData = JSON.parse(req.body.campdata); 
+
+  
+    const gg=await LinkModel.upsert({
+        camp_name:campData.campname,	
+        link_title:campData.linktitle,
+        link:campData.link,
+        language:campData.language,
+        Link_Created_By:campData.linkcreatedby,
+        json_data:campData.json_data,
+        is_published:0 
+  });
+
+  res.send(gg)
+}
+
+
 const delay = time => new Promise(res=>setTimeout(res,time));
 exports.upload_file = async (req, res) => {
     let ftp=new FTP()
