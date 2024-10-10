@@ -77,7 +77,7 @@ exports.getUsers = async (req, res) => {
     let search=req.query.search || "";
     // import function here
     
-    
+     
     var condition =search ? 
     {[Op.or]: [ 
       { camp_name: { [Op.like]: `%${search}%` } }, 

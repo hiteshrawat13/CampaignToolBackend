@@ -351,7 +351,8 @@ const saveLinkToDatabase=async (campData)=>{
                     Country:campData.country,
                     camp_Created_By:campData.linkcreatedby,
                     last_edited_By:campData.editedby,
-                    json_data:campData.json_data
+                    json_data:campData.json_data,
+                    link_type:campData.link_type
                 }
               });
     
@@ -364,7 +365,8 @@ const saveLinkToDatabase=async (campData)=>{
                         link:campData.link,
                         language:campData.language,
                         Link_Created_By:campData.linkcreatedby,
-                        json_data:campData.json_data
+                        json_data:campData.json_data,
+                        link_type:campData.link_type
                   });
 
               }
@@ -384,6 +386,29 @@ const saveLinkToDatabase=async (campData)=>{
           
             // ========================================================================================================
 
+
+}
+
+
+exports.save_link= async (req, res) => {
+
+    const campData=JSON.parse(req.body.campdata)
+
+
+    
+
+    let created2 = await LinkModel.upsert({
+              
+        camp_name:campData.campname,	
+        link_title:campData.linktitle,
+        link:campData.link,
+        language:campData.language,
+        Link_Created_By:campData.linkcreatedby,
+        json_data:campData.json_data,
+        link_type:campData.link_type
+  });
+
+  res.json(created2)
 
 }
 

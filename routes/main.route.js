@@ -20,6 +20,7 @@ router.post('/grab_tgif_client_link_form',mainController.grab_tgif_client_link_f
 router.post('/campaign/create',mainController.create_campaign)
 router.post('/link/create',mainController.create_link)
 router.post('/link/update',mainController.update_link)
+router.post('/link/save',mainController.save_link)
 
 router.post('/login',mainController.login)
 
