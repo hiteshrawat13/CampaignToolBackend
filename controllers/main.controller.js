@@ -390,21 +390,21 @@ const saveLinkToDatabase=async (campData)=>{
 }
 
 
-exports.save_link= async (req, res) => {
 
-    const campData=JSON.parse(req.body.campdata)
+exports.save_link=async (req, res) =>{
+  
+    let campData = JSON.parse(req.body.campdata); 
 
+  
+    const gg=await LinkModel.upsert({
 
-    
-
-    let created2 = await LinkModel.upsert({
-              
         camp_name:campData.campname,	
         link_title:campData.linktitle,
         link:campData.link,
         language:campData.language,
         Link_Created_By:campData.linkcreatedby,
         json_data:campData.json_data,
+
         link_type:campData.link_type
   });
 

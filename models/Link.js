@@ -56,8 +56,13 @@ const LinkModel = sequelize.define(
       link_type:{
          type: DataTypes.STRING,
          allowNull: true,
-      }
+      },
 
+
+      is_published: {
+         type: DataTypes.INTEGER,
+         allowNull: true,
+      },
 
    }
 );
