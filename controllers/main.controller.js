@@ -408,7 +408,7 @@ exports.save_link=async (req, res) =>{
         link_type:campData.link_type
   });
 
-  res.json(created2)
+  res.json(gg)
 
 }
 
