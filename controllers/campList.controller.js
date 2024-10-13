@@ -174,29 +174,30 @@ exports.addCampList= async (req,res)=>{
 
 exports.editCampList= async (req,res)=>{
    
+
+    console.log(req.body);
+    
     try{
         const campaign = await campListModel.findOne({
             where: {
-                camp_name: req.body.camp_name
+                camp_name: req.body.campaignName
             }
           })
           
-          await campaign.update({ 
+          const result=await campaign.update({ 
 
-            camp_id	:req.body.camp_id,	
-            camp_name:req.body.camp_name,	
-            Category:req.body.Category,	
-            Client_Code:req.body.Client_Code,
-            Country:req.body.Country,
-            camp_Created_By:req.body.camp_Created_By,
-            last_edited_By:req.body.last_edited_By,
+            camp_id	:req.body.campaignId,	
+            camp_name:req.body.campaignName,	
+            Category:req.body.category,	
+            Client_Code:req.body.clientCode,
+            Country:req.body.country,
+            camp_Created_By:req.body.campCreatedBy,
+            last_edited_By:req.body.lastEditedBy,
             comment	:req.body.comment,
 
            });
 
-          return res.json({
-            message: "campaign updated successfully!",
-            });
+         res.json({ message: "campaign updated successfully!",result });
 
     }catch(error){
         return res.json({

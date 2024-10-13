@@ -352,7 +352,8 @@ const saveLinkToDatabase=async (campData)=>{
                     camp_Created_By:campData.linkcreatedby,
                     last_edited_By:campData.editedby,
                     json_data:campData.json_data,
-                    link_type:campData.link_type
+                    link_type:campData.link_type,
+                    is_published:1
                 }
               });
     
@@ -366,7 +367,8 @@ const saveLinkToDatabase=async (campData)=>{
                         language:campData.language,
                         Link_Created_By:campData.linkcreatedby,
                         json_data:campData.json_data,
-                        link_type:campData.link_type
+                        link_type:campData.link_type,
+                        is_published:1
                   });
 
               }
@@ -378,7 +380,8 @@ const saveLinkToDatabase=async (campData)=>{
                     link:campData.link,
                     language:campData.language,
                     Link_Created_By:campData.linkcreatedby,
-                    json_data:campData.json_data
+                    json_data:campData.json_data,
+                    is_published:1
               });
               console.log("Link created",link);
 
@@ -463,7 +466,7 @@ exports.upload_file = async (req, res) => {
 
             console.log("------START-----\n",req.body,"\n---END---");
 
-            console.log("ISVALIDLOGO",req.body.logoFile && req.body.logoFile==fileName.filename);
+          //  console.log("ISVALIDLOGO",req.body.logoFile && req.body.logoFile==fileName.filename);
             ftp.uploadFile(fileStream,(req.body.logoFile && req.body.logoFile==fileName.filename)?"logo/"+fileName.filename:fileName.filename,
             function onProgress(progress){
                 socketInstance?.emit('uploadProgress', {name:fileName.filename,progress:progress});
