@@ -7,7 +7,7 @@ const Sequelize = require("sequelize");
  * Create a Sequelize instance. This can be done by passing
  * the connection parameters separately to the Sequelize constructor.
  */
-const sequelize = new Sequelize("cbtool", "root", "", {
+const sequelize = new Sequelize("cbtool", "root", "12345", {
    host: "localhost",
    dialect: "mysql",
 
