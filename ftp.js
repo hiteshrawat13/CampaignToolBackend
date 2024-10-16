@@ -14,8 +14,8 @@ class FTP{
             secure:false,//Set to true for both control and data connection encryption, 'control' for control connection encryption only, or 'implicit' for implicitly encrypted control connection (this mode is deprecated in modern times, but usually uses port 990) Default: false
             user:"whitepapers@resource.itbusinesstoday.com",
             password: 'Pilot@2023?',
-           // path:"download"
-            path:""
+            path:"cbtool_test"
+           // path:""
         })
        
 
