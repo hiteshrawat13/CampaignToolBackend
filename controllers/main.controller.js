@@ -543,7 +543,7 @@ exports.upload_file = async (req, res) => {
     } catch (error) {
         console.log(error); 
         response.push({error})
-        res.json(response)
+        res.status(500).json(error)
     }
 }else{
     response.push({error:"NOT Busboy "})

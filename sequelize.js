@@ -18,7 +18,7 @@ const sequelize = new Sequelize("cbtool", "root", "12345", {
         await sequelize.sync({
 
             // force:"true",
-             alter:true
+            // alter:true
 
             // force:"true"
             //alter:true
