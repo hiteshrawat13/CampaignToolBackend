@@ -24,6 +24,9 @@ router.post('/link/save',mainController.save_link)
 
 router.post('/login',mainController.login)
 
+router.post('/link_exists',mainController.link_exists)
+
+
 router.post('/upload_file/:ftpConfigName/:socketId',mainController.upload_file)
 router.post('/upload',mainController.ftptest)
 
