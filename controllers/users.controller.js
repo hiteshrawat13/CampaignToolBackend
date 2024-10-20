@@ -17,20 +17,22 @@ exports.login= async (req,res)=>{
             where: {empid}
         });
         if (!user) {
-            return res.status(404).json({messsage:'User not found'});
+            return res.status(404).json({message:'User not found'});
         }
 
         if(user.status === false){
-            return res.status(401).json('User is disabled');
+            return res.status(401).json({message:'User is disabled'});
         }
 
         // Verify password
         const passwordValid = password ===user.password;
         if (!passwordValid) {
-            return res.status(404).json({messsage:'Incorrect id and password combination'});
+            return res.status(404).json({message:'Incorrect id and password combination'});
         }
 
 
+        console.log(user.empid, process.env.JWT_SECRET);
+        
         // Authenticate user with jwt
         const token = jwt.sign({ id: user.empid }, process.env.JWT_SECRET, {
             expiresIn: "1000"
@@ -50,7 +52,7 @@ exports.login= async (req,res)=>{
         });
     } catch (err) {
         console.log(err);
-        return res.status(500).send('Sign in error');
+        return res.status(500).send({message:'Sign in error'});
     }
 
 }
