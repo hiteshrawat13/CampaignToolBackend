@@ -468,6 +468,10 @@ exports.upload_file = async (req, res) => {
 
             form.on("file", async (fieldName, fileStream, fileName, encoding, mimeType) => {
 
+
+                console.log(fileName,"@@@@@@@@@@@@@");
+                
+
                 if(socketInstance==null)socketInstance = getSocketInstance(req) //Get Socket Instance
 
                 try {
@@ -476,7 +480,7 @@ exports.upload_file = async (req, res) => {
                     //console.log("------START-----\n",req.body,"\n---END---");
 
                     //  console.log("ISVALIDLOGO",req.body.logoFile && req.body.logoFile==fileName.filename);
-                    ftp.uploadFile(fileStream, (req.body.logoFile && req.body.logoFile == fileName.filename) ? "logo/" + fileName.filename : fileName.filename,
+                    ftp.uploadFile(fileStream, (req.body.logoFile && req.body.logoFile == fileName.filename) ? req.body.logoFolder + fileName.filename : fileName.filename,
                         function onProgress(progress) {
                             socketInstance?.emit('uploadProgress', { name: fileName.filename, progress: progress });
                         },
@@ -547,7 +551,7 @@ exports.upload_file = async (req, res) => {
         } catch (error) {
             console.log(error);
             response.push({ error })
-            res.status(500).json(error)
+            res.status(500).json({message:error.message})
         }
     } else {
         response.push({ error: "NOT Busboy " })
@@ -701,6 +705,19 @@ exports.ftptest = (req, res) => {
 }
 
 
-exports.link_exists= (req, res) => {
+exports.link_exists= async (req, res) => {
 
+    console.log(req.body);
+    
+    try {
+        const api_call = await fetch(req.body.url);
+        
+        res.json({status:"success",message:api_call.status});
+    } catch (error) {
+        res.json({status:"error",message:error.message});
+    }
+       
+    
+   
+ 
 }
